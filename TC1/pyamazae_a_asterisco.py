@@ -1,19 +1,23 @@
 # Hola profe :) 
-from pyamaze import maze,COLOR,agent
+from pyamaze import maze,COLOR,agent, textLabel
+from time import perf_counter
 import random
 import heapq
 
 #Parametros generales del laberinto
 #tamaño del laberinto
-x_inicial = random.randint(5,20)
-y_inicial = random.randint(5,20)
+x_inicial = random.randint(50,90)
+y_inicial = random.randint(50,90)
 #posicion de la meta
-y_meta = 3
-x_meta = 2
+y_meta = random.randint(0,y_inicial)
+x_meta = random.randint(0,x_inicial)
 
 #posicion de inicio y meta
 meta = (y_meta,x_meta) #pyamaze siempre lo pone en 1,1
-inicio = (y_inicial,x_inicial) 
+inicio = (random.randint(0,y_inicial),random.randint(0,x_inicial)) 
+
+# Longitud del camino
+longitud = 0
 
 #Clase que representa una celda
 class Celda: 
@@ -75,12 +79,14 @@ def armar_camino(celdas, destino):
     return camino
 
 #funcion que mueve el agente por el laberinto para mostrar el camino 
-def mostrar_camino(camino, agente):
+def mostrar_camino(camino):
+    global longitud
+    longitud = len(camino)
     for nodo in camino:
         agente.position = nodo
 
 #algoritmo principal de A*
-def a_estrella(mapa, agente):
+def a_estrella(mapa):
     x = inicio[1]
     y = inicio[0]
 
@@ -121,7 +127,7 @@ def a_estrella(mapa, agente):
                     detalles_celda[nueva_y][nueva_x].padres = (y,x)
                     destino_alcanzado = True
                     camino = armar_camino(detalles_celda, meta)
-                    mostrar_camino(camino, agente)
+                    mostrar_camino(camino)
                     return
                 else: 
                     #Segun los nodos a los que se pueden llegar se generan g,h y f
@@ -141,7 +147,7 @@ def a_estrella(mapa, agente):
 
 
 
-
+start_time = perf_counter()
 #se crea el laberinto
 m = maze(y_inicial,x_inicial)
 # goal en 1,1 inicio en y_inicial, x_inicial
@@ -150,12 +156,23 @@ m.CreateMaze(y_meta,x_meta,loopPercent= 100)
 #otras formas de generar el laberinto
 #m.CreateMaze(theme=COLOR.light,pattern='v') #vertical
 #m.CreateMaze(theme=COLOR.light,pattern='h') #horizontal
-
-a=agent(m,footprints=True)
+agente=agent(m,inicio[0],inicio[1],footprints=True,filled=True)
 # maze_map -> arreglo con dato de tipo 
 # {(y, x): {'E': 1, 'W': 0, 'N': 0, 'S': 0}} 1 = camino, 0 = pared
 mapa = m.maze_map
-a_estrella(mapa, a)
+maze_time = perf_counter() - start_time
+
+start_time = perf_counter()
+a_estrella(mapa)
+astar_time = perf_counter() - start_time
+
+textLabel(m,"Tiempo demorado en crear el laberinto",maze_time)
+textLabel(m,"Tiempo demorado por A*",astar_time)
+textLabel(m,"Tamaño",str(x_inicial) + " x " + str(y_inicial))
+textLabel(m,"Pos Inicial",str(inicio[0]) + " x " + str(inicio[1]))
+textLabel(m,"Pos Final",str(meta[0]) + " x " + str(meta[1]))
+textLabel(m,"Distancia recorrida",longitud)
+
 
 #logica del A* 
 m.run()
