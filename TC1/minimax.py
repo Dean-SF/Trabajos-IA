@@ -2,7 +2,6 @@ import copy
 import random
 import sys
 from time import perf_counter
-
 """
 Tres en raya con Minimax
 """
@@ -36,17 +35,17 @@ class TicTacToe:
             return self.X
 
     def actions(self, board):
-      """
-      Retorna un conjunto de posibles movimientos (fila,columna) según el estado actual del tablero
-      """
-      actions_set = set()
+        """
+        Retorna un conjunto de posibles movimientos (fila,columna) según el estado actual del tablero
+        """
+        actions_set = set()
 
-      for row in range(3):
-          for col in range(3):
-              if board[row][col] == self.EMPTY:
-                  actions_set.add((row, col))
+        for row in range(3):
+            for col in range(3):
+                if board[row][col] == self.EMPTY:
+                    actions_set.add((row, col))
 
-      return actions_set
+        return actions_set
 
     def result(self, board, action):
         """
@@ -91,7 +90,101 @@ class TicTacToe:
             return -1
         else:
             return 0
-          
+    
+    def check_lines(self, board):
+        """
+        Revisa todas las lineas rectas verticales y horizontales
+        retorna 1 si X tiene la ventaja, -1 si O tiene la ventaja
+        y 0 si ninguno tiene la ventaja
+        """
+        x_winning = False
+        o_winning = False
+
+        # Revisar horizontalmente
+        for row in board:
+            x_count = row.count(self.X)
+            o_count = row.count(self.O)
+            if x_count == 2 and o_count == 0:
+                x_winning = True
+            elif x_count == 0 and o_count == 2:
+                o_winning = True
+            
+        # Revisar verticalmente
+        t_board = list(map(list,zip(*board)))
+        for col in t_board:
+            x_count = col.count(self.X)
+            o_count = col.count(self.O)
+            if x_count == 2 and o_count == 0:
+                x_winning = True
+            elif x_count == 0 and o_count == 2:
+                o_winning = True
+        
+        if(x_winning and not o_winning):
+            return 1
+        elif(o_winning and not x_winning):
+            return -1
+        else:
+            return 0
+
+    def check_diag(self, board):
+        """
+        Revisa las diagonales y retorna 1 si X tiene la ventaja,
+        -1 si O tiene la ventaja y 0 si ninguno tiene la ventaja
+        """
+        # Revisar la primer diagonal
+        first_diag = [board[0][0],board[1][1],board[2][2]]
+        x_count = first_diag.count(self.X)
+        o_count = first_diag.count(self.O)
+        if x_count == 2 and o_count == 0:
+                return 1
+        elif x_count == 0 and o_count == 2:
+                return -1
+
+        # Revisar la segunda diagonal
+        second_diag = [board[0][2],board[1][1],board[2][0]]
+        x_count = second_diag.count(self.X)
+        o_count = second_diag.count(self.O)
+        if x_count == 2 and o_count == 0:
+                return 1
+        elif x_count == 0 and o_count == 2:
+                return -1
+
+        
+        return 0
+
+    def evaluate_game(self, board, invert=False):
+        """
+        Evalua el estado actual del juego y retorna un 1 si el estado es positivo para el 
+        jugador activo y un valor negativo si es ventaja para su oponente
+        """
+        diags = 0
+        lines = self.check_lines(board)
+        if invert:
+            player = self.X if self.player(board) is self.O else self.O
+        else:
+            player = self.player(board)
+
+        if not lines:
+            diags = self.check_diag(board)
+            if diags != 0:
+                if player is self.X:
+                    print(f"Estado actual del juego para {player}: ", diags)
+                    return
+                else:
+                    print(f"Estado actual del juego para {player}: ", diags*-1)
+                    return
+        
+        else:
+            if player is self.X:
+                print(f"Estado actual del juego para {player}: ", lines)
+                return
+            else:
+                print(f"Estado actual del juego para {player}: ", lines*-1)
+                return
+            
+        print(f"Estado actual del juego para {player}: ", 0)
+
+
     def minimax(self, board):
         """
         Retorna el movimiento óptimo para el jugador activo
@@ -154,7 +247,6 @@ class TicTacToe:
 """
 Clase para ejecutar el juego
 """
-
 class Runner:
     def __init__(self):
         self.tic_tac_toe = TicTacToe()
@@ -172,8 +264,11 @@ class Runner:
                 while True:
                     if self.user is None:
                         break
+                    self.tic_tac_toe.evaluate_game(self.board)
                     self.print_board()
                     self.play_game()
+                    self.tic_tac_toe.evaluate_game(self.board,True)
+                    print("-------------------------------------")
             
     def random_oponent_test(self):
         test_scenarios=[self.tic_tac_toe.X,self.tic_tac_toe.O,None]
@@ -196,7 +291,7 @@ class Runner:
                     print(msg, "Minmax - Random")
                 case 2:
                     print(msg, "Minmax - Minmax")
-            for j in range(500):
+            for j in range(TEST_NUM):
                 print(f"\n------------ Prueba #{j+1} ------------")
                 self.user = self.tic_tac_toe.X if test is None else test
                 while True:
@@ -210,7 +305,10 @@ class Runner:
                                 scenario_stadistics[i][3] += 1
                         break
                     #self.print_board()
+                    self.tic_tac_toe.evaluate_game(self.board)
                     winner = scenario_func()
+                    self.tic_tac_toe.evaluate_game(self.board,True)
+                    print("-------------------------------------")
 
         self.test_stadistics(scenario_stadistics)
     
@@ -326,7 +424,7 @@ class Runner:
                 print("Valor incorrecto. Debe ingresar números entre 0 y 2, separados por una coma.")
 
     def get_random_move(self):
-        print(f"El oponente aleatorio va ser su movimiento")
+        print(f"El oponente aleatorio va hacer su movimiento")
 
         empty_spaces = []
 
@@ -349,5 +447,6 @@ class Runner:
         self.board = self.tic_tac_toe.initial_state()
 
 if __name__ == "__main__":
+    TEST_NUM = 500
     runner = Runner()
     runner.run_game()
