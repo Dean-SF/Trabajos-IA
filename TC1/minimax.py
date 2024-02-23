@@ -1,10 +1,11 @@
 import copy
 import random
+import sys
+from time import perf_counter
 
 """
 Tres en raya con Minimax
 """
-
 class TicTacToe:
     """
     Esta clase implementa el algoritmo minimax para
@@ -14,7 +15,6 @@ class TicTacToe:
     X = "X"     # Extremo max
     O = "O"     # Extremo min
     EMPTY = None
-
     def initial_state(self):
         """
         Inicializar el estado del juego
@@ -164,13 +164,56 @@ class Runner:
 
     def run_game(self):
         while True:
-            self.print_board()
-
             # El usuario elige un jugador
-            if self.user is None:
-                self.choose_player()
+            random=self.choose_player()
+            if random:
+                self.random_oponent_test()
             else:
-                self.play_game()
+                while True:
+                    if self.user is None:
+                        break
+                    self.print_board()
+                    self.play_game()
+            
+    def random_oponent_test(self):
+        test_scenarios=[self.tic_tac_toe.X,self.tic_tac_toe.O,None]
+        msg="\nEjecutando 500 pruebas del escenario: "
+        # las columnas son: P1, P2, Empates
+        # Las Filas: Random - Minmax
+        #            Minmax - Random
+        #            Minmax - Minmax
+        scenario_stadistics=[["Random - Minmax", 0,0,0],
+                             ["Minmax - Random", 0,0,0],
+                             ["Minmax - Minmax", 0,0,0]]
+        winner = None
+    
+        for i,test in enumerate(test_scenarios):
+            scenario_func = self.play_game_AI if test is None else self.play_game_random
+            match i:
+                case 0:
+                    print(msg, "Random - Minmax")
+                case 1:
+                    print(msg, "Minmax - Random")
+                case 2:
+                    print(msg, "Minmax - Minmax")
+            for j in range(500):
+                print(f"\n------------ Prueba #{j+1} ------------")
+                self.user = self.tic_tac_toe.X if test is None else test
+                while True:
+                    if self.user is None:
+                        match(winner):
+                            case self.tic_tac_toe.X:
+                                scenario_stadistics[i][1] += 1
+                            case self.tic_tac_toe.O:
+                                scenario_stadistics[i][2] += 1
+                            case None:
+                                scenario_stadistics[i][3] += 1
+                        break
+                    #self.print_board()
+                    winner = scenario_func()
+
+        self.test_stadistics(scenario_stadistics)
+    
 
     def print_board(self):
         # Imprimir el tablero de juego
@@ -178,19 +221,35 @@ class Runner:
             print(" | ".join(cell if cell is not None else " " for cell in row))
             print("-" * 9)
 
+    def test_stadistics(self,scenario_stadistics):
+        print("\nPruebas terminadas... Imprimiendo resultados...\n")
+        print("{:<17} {:<8} {:<8} {:<8}".format("Estilo de juego","P1 Gana", "P2 Gana", "Empate"))
+        for stats in scenario_stadistics:
+            scenario,p1,p2,draw=stats
+            print("{:<17} {:<8} {:<8} {:<8}".format(scenario,p1,p2,draw))
+
     def choose_player(self):
         print("Tres en raya")
         print("Elija un jugador:")
         print("1. X")
         print("2. O")
+        print("3. Prueba contra Aleatorio")
+        print("0. Salir")
 
-        choice = input("Ingrese su respuesta: ")
-        if choice == "1":
-            self.user = self.tic_tac_toe.X
-        elif choice == "2":
-            self.user = self.tic_tac_toe.O
-        else:
-            print("Debe elegir opción 1 o 2")
+        while True:
+            choice = input("Ingrese su respuesta: ")
+            if choice == "1":
+                self.user = self.tic_tac_toe.X
+                return False
+            elif choice == "2":
+                self.user = self.tic_tac_toe.O
+                return False
+            elif choice == "3":
+                return True
+            elif choice == "0":
+                sys.exit()
+            else:
+                print("Debe elegir opción 1 o 2")
 
     def play_game(self):
         # Si es el turno del usuario, obtener el input
@@ -210,6 +269,45 @@ class Runner:
                 print("Game over. Es un empate!")
             self.reset_game()
 
+    def play_game_random(self):
+        # Si es el turno del oponente aleatorio se elige una pos aleatoria
+        if self.user == self.tic_tac_toe.player(self.board):
+            self.get_random_move()
+        # Si es el turno de la IA, ejecutar algoritmo minimax
+        else:
+            self.make_ai_move()
+
+        # Verificar si el juego ha terminado
+        if self.tic_tac_toe.terminal(self.board):
+            self.print_board()
+            winner = self.tic_tac_toe.winner(self.board)
+            if winner is not None:
+                print(f"Game over. {winner} es el ganador!")
+                self.reset_game()
+                return winner
+            else:
+                print("Game over. Es un empate!")
+                self.reset_game()
+                return None
+            
+
+    def play_game_AI(self):
+        # La IA juega contra si misma
+        self.make_ai_move()
+
+        # Verificar si el juego ha terminado
+        if self.tic_tac_toe.terminal(self.board):
+            self.print_board()
+            winner = self.tic_tac_toe.winner(self.board)
+            if winner is not None:
+                print(f"Game over. {winner} es el ganador!")
+                self.reset_game()
+                return winner
+            else:
+                print("Game over. Es un empate!")
+                self.reset_game()
+                return None
+
     def get_user_move(self):
         print(f"Es tu turno, {self.user}")
         while True:
@@ -226,6 +324,20 @@ class Runner:
                     print("El número de fila y columna deben ser entre 0 y 2.")
             except (ValueError, IndexError):
                 print("Valor incorrecto. Debe ingresar números entre 0 y 2, separados por una coma.")
+
+    def get_random_move(self):
+        print(f"El oponente aleatorio va ser su movimiento")
+
+        empty_spaces = []
+
+        for i,row in enumerate(self.board):
+            for j,element in enumerate(row):
+                if element is None:
+                    empty_spaces.append((i,j))
+        
+        random_pos = random.choice(empty_spaces)
+
+        self.board = self.tic_tac_toe.result(self.board, random_pos) 
 
     def make_ai_move(self):
         print("La IA va a hacer un movimiento\n")
