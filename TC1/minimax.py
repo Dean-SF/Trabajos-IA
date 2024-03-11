@@ -1,3 +1,9 @@
+"""
+Andrea María Li Hernández - 2021028783
+Deyan Andrey Sanabria Fallas - 2021046131
+Erick Fabián Madrigal Zavala - 2018146983
+"""
+
 import copy
 import random
 import sys

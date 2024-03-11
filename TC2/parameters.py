@@ -1,0 +1,35 @@
+# Constant values for genetic
+STROKES_PER_INDIVIDUAL = 500
+POPULATION = 100
+NUM_GENERATIONS = 50
+FITTEST_PERCENT = 0.1
+MUTATED_PERCENT = 0.45
+CROSSED_PERCENT = 0.45
+
+# Mutation
+MIN_MUTATIONS_STROKE = 1
+MAX_MUTATIONS_STROKE = 5
+# -----------------------
+MIN_STROKE_TO_MUTATE = 1
+MAX_STROKE_TO_MUTATE = 50
+
+# Crossover
+MIN_STROKE_TO_CROSS = 1
+MAX_STROKE_TO_CROSS = 50
+
+# Constant values for images
+IMG_SIZE = 128
+
+# Constant values for brushes
+STROKE_MAX_SIZE = 20
+STROKE_MIN_SIZE = 1
+
+# better not to touch anything below
+BACKGROUND_THRESHOLD = 0
+MIN_DARK_LEVEL = 0
+MAX_DARK_LEVEL = 225
+
+MIN_ANGLE = 0
+MAX_ANGLE = 360
+
+NUM_BRUSHES = 4
