@@ -8,10 +8,15 @@ import parameters as c
 # ---------------------------------GOAL IMAGE READING-----------------------------------
 # --------------------------------------------------------------------------------------
 
+# Reading the original picture
 img = cv.imread("BW-using-curves.jpg",cv.IMREAD_GRAYSCALE)
 
-aspect_ratio = img.shape[1] / img.shape[0]
+# calculate the original aspect ratio to mantain it in the final downscale size
+aspect_ratio = img.shape[1] / img.shape[0] 
 
+# Here we downscale the biggest dimension of the picture
+# to the maximum image size defined in parameters
+# the other dimension is adjusted according to the aspect ratio
 if img.shape[1] < img.shape[0]:
     new_img_height = c.IMG_SIZE
     new_img_width = int(new_img_height * aspect_ratio)
@@ -19,7 +24,8 @@ else:
     new_img_width = c.IMG_SIZE
     new_img_height = int(new_img_width / aspect_ratio)
 
-img = cv.resize(img,(new_img_width,new_img_height),interpolation=cv.INTER_LANCZOS4)
+# Original picture downscaled
+img = cv.resize(img,(new_img_width,new_img_height),interpolation=cv.INTER_LANCZOS4) 
 
 # Global variables
 ImageSize.height = new_img_height

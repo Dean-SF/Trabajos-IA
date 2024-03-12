@@ -1,9 +1,9 @@
-import cv2 as cv
-import numpy as np
+from Genetic.image_size import ImageSize
 from random import randint,sample
 from copy import deepcopy
 import parameters as c
-from Genetic.image_size import ImageSize
+import numpy as np
+import cv2 as cv
 
 # Basic stroke data, DNA is composed of strokes, we'll be evolving each stroke per generation.
 class Stroke:
