@@ -112,15 +112,18 @@ class Individual:
         # Getting the brush from which the stroke is going to be generated
         stroke_drawing = self.brush_templates[stroke.brush_type]
 
-        # Sizing the stroker
+        # Sizing the stroke
         stroke_drawing = cv.resize(stroke_drawing,(size,)*2,interpolation=cv.INTER_LANCZOS4)
 
         # Rotating the stroke.
         rotation = cv.getRotationMatrix2D((size//2,)*2,stroke.angle,1)
         stroke_drawing = cv.warpAffine(stroke_drawing,rotation,(size,)*2)
 
+        # Masking the stoke
+        _,stroke_drawing = cv.threshold(stroke_drawing, 1, 255, cv.THRESH_BINARY)
+
         # Changing how dark the stroke is going to be.
-        stroke_drawing = cv.add(stroke_drawing, stroke.dark_level*-1)
+        stroke_drawing = cv.add(stroke_drawing, (stroke.dark_level*-1))
         
         return stroke_drawing
 
@@ -128,7 +131,6 @@ class Individual:
         self.brush_templates = []
         for i in range(c.NUM_BRUSHES):
             brush = cv.imread(f"brushes/{i}.jpg",cv.IMREAD_GRAYSCALE)
-            _, brush = cv.threshold(brush, 1, 255, cv.THRESH_BINARY)
             self.brush_templates.append(brush)
 
     def calculate_fitness(self,goal):

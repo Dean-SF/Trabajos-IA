@@ -32,12 +32,12 @@ rotation = cv.getRotationMatrix2D(center,angle,1.0)
 rotated = cv.warpAffine(brush,rotation,(brush.shape[1],brush.shape[0]))
 
 
-brush_max = cv.resize(rotated,(c.BRUSH_MAX_SIZE,c.BRUSH_MAX_SIZE),interpolation=cv.INTER_LANCZOS4)
+brush_max = cv.resize(rotated,(c.STROKE_MAX_SIZE,c.STROKE_MAX_SIZE),interpolation=cv.INTER_LANCZOS4)
 _, brush_max1 = cv.threshold(brush_max, 1, 255, cv.THRESH_BINARY)
 
 brush_max = cv.add(brush_max1, -225)
 
-brush_min = cv.resize(rotated,(c.BRUSH_MIN_SIZE,c.BRUSH_MIN_SIZE),interpolation=cv.INTER_LANCZOS4)
+brush_min = cv.resize(rotated,(c.STROKE_MIN_SIZE,c.STROKE_MIN_SIZE),interpolation=cv.INTER_LANCZOS4)
 
 
 # ------------------------------------------------------------------------
@@ -50,14 +50,14 @@ new = blank_img.copy()
 posx = 0
 posy = 0
 
-new[posy:posy+c.BRUSH_MAX_SIZE,posx:posx+c.BRUSH_MAX_SIZE][brush_max>c.BACKGROUND_THRESHOLD] = brush_max[brush_max>c.BACKGROUND_THRESHOLD]
+new[posy:posy+c.STROKE_MAX_SIZE,posx:posx+c.STROKE_MAX_SIZE][brush_max>c.BACKGROUND_THRESHOLD] = brush_max[brush_max>c.BACKGROUND_THRESHOLD]
 
 posx = 50
 posy = 50
 
 brush_max = cv.add(brush_max1, -185)
-new[posy:posy+c.BRUSH_MAX_SIZE,posx:posx+c.BRUSH_MAX_SIZE][brush_max>c.BACKGROUND_THRESHOLD] = brush_max[brush_max>c.BACKGROUND_THRESHOLD]
-#new[posy:posy+c.BRUSH_MIN_SIZE,posx:posx+c.BRUSH_MIN_SIZE][brush_min>c.BACKGROUND_THRESHOLD] = brush_min[brush_min>c.BACKGROUND_THRESHOLD]
+new[posy:posy+c.STROKE_MAX_SIZE,posx:posx+c.STROKE_MAX_SIZE][brush_max>c.BACKGROUND_THRESHOLD] = brush_max[brush_max>c.BACKGROUND_THRESHOLD]
+#new[posy:posy+c.STROKE_MIN_SIZE,posx:posx+c.STROKE_MIN_SIZE][brush_min>c.BACKGROUND_THRESHOLD] = brush_min[brush_min>c.BACKGROUND_THRESHOLD]
 
 plt.imshow(new,cmap='gray', vmin=0, vmax=255)
 plt.axis('off')
